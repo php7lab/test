@@ -2,13 +2,13 @@
 
 namespace PhpLab\Test;
 
-use PhpLab\Domain\Data\DataProviderEntity;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use php7extension\core\web\enums\HttpHeaderEnum;
 use php7extension\core\web\enums\HttpMethodEnum;
 use php7extension\core\web\enums\HttpStatusCodeEnum;
+use PhpLab\Domain\Data\DataProviderEntity;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -96,7 +96,7 @@ class BaseRestTest extends WebTestCase
         $this->assertEquals(HttpStatusCodeEnum::CREATED, $response->getStatusCode());
         $entityId = $response->getHeader(HttpHeaderEnum::X_ENTITY_ID)[0];
         $this->assertNotEmpty($entityId);
-        if($actualEntityId) {
+        if ($actualEntityId) {
             $this->assertEquals($actualEntityId, $entityId);
         }
     }
@@ -109,10 +109,10 @@ class BaseRestTest extends WebTestCase
 
         $this->assertEquals($origin, $actualOrigin);
 
-        if($headers) {
+        if ($headers) {
             $this->assertEquals($headers, $actualHeaders);
         }
-        if($methods) {
+        if ($methods) {
             $arr = explode(',', $actualMethods);
             $arr = array_map('trim', $arr);
             $diff = array_diff($methods, $arr);
@@ -120,25 +120,25 @@ class BaseRestTest extends WebTestCase
         }
     }
 
-    protected function assertOrder($collection, $attribute, $direction= SORT_ASC)
+    protected function assertOrder($collection, $attribute, $direction = SORT_ASC)
     {
         $currentValue = null;
         foreach ($collection as $item) {
-            if($currentValue === null) {
+            if ($currentValue === null) {
                 $currentValue = $item[$attribute];
             }
-            if($direction == SORT_ASC) {
-                if($item[$attribute] < $currentValue) {
+            if ($direction == SORT_ASC) {
+                if ($item[$attribute] < $currentValue) {
                     $this->expectExceptionMessage('Fail order!');
                 }
-                if($item[$attribute] > $currentValue) {
+                if ($item[$attribute] > $currentValue) {
                     $currentValue = $item[$attribute];
                 }
             } else {
-                if($item[$attribute] > $currentValue) {
+                if ($item[$attribute] > $currentValue) {
                     $this->expectExceptionMessage('Fail order!');
                 }
-                if($item[$attribute] < $currentValue) {
+                if ($item[$attribute] < $currentValue) {
                     $currentValue = $item[$attribute];
                 }
             }
@@ -153,13 +153,13 @@ class BaseRestTest extends WebTestCase
         $entity->totalCount = $response->getHeader(HttpHeaderEnum::TOTAL_COUNT)[0];
         //$entity->pageCount = $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0];
 
-        if($page) {
+        if ($page) {
             $this->assertEquals($page, $entity->page);
         }
-        if($pageSize) {
+        if ($pageSize) {
             $this->assertEquals($pageSize, $entity->pageSize);
         }
-        if($totalCount) {
+        if ($totalCount) {
             $this->assertEquals($totalCount, $entity->totalCount);
         }
         $this->assertEquals($entity->pageCount, $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0]);
