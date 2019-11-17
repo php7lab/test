@@ -18,6 +18,11 @@ class BaseRestTest extends WebTestCase
     protected $baseUrl;
     protected $basePath = '/';
 
+    protected function setUp(): void
+    {
+        $this->baseUrl = $_ENV['API_DOMAIN_URL'];
+    }
+
     protected function sendOptions($uri)
     {
         $client = $this->getGuzzleClient();
