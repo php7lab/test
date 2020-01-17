@@ -14,5 +14,11 @@
 			"PhpLab\\Test\\": "src",
 			"PhpLab\\Test\\Tests\\": "tests"
 		}
+	},
+	"require": {
+		"codeception/base": "2.4.0",
+		"codeception/verify": "0.3.3",
+		"codeception/phpunit-wrapper": "6.0.9",
+		"phpunit/phpunit": "6.5.8"
 	}
 }
