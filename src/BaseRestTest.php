@@ -5,10 +5,10 @@ namespace PhpLab\Test;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
+use PhpLab\Domain\Data\DataProviderEntity;
 use PhpLab\Sandbox\Web\Enums\HttpHeaderEnum;
 use PhpLab\Sandbox\Web\Enums\HttpMethodEnum;
 use PhpLab\Sandbox\Web\Enums\HttpStatusCodeEnum;
-use PhpLab\Domain\Data\DataProviderEntity;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
