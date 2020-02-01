@@ -5,6 +5,7 @@ namespace PhpLab\Test;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
+use php7extension\yii\helpers\ArrayHelper;
 use PhpLab\Domain\Data\DataProviderEntity;
 use PhpLab\Sandbox\Web\Enums\HttpHeaderEnum;
 use PhpLab\Sandbox\Web\Enums\HttpMethodEnum;
@@ -84,6 +85,16 @@ abstract class BaseRestTest extends WebTestCase
         return $response;
     }
 
+    protected function assertSubsetText(ResponseInterface $response, $actualString)
+    {
+        $body = $this->getBody($response);
+        $isFail = mb_strpos($body, $actualString) === false;
+        if($isFail) {
+            $this->expectExceptionMessage('Subset string not found in text!');
+        }
+        $this->assertEquals(false, $isFail);
+    }
+
     protected function assertBody(ResponseInterface $response, $actualBody)
     {
         $body = $this->getBody($response);
@@ -130,21 +141,21 @@ abstract class BaseRestTest extends WebTestCase
         $currentValue = null;
         foreach ($collection as $item) {
             if ($currentValue === null) {
-                $currentValue = $item[$attribute];
+                $currentValue = ArrayHelper::getValue($item, $attribute);
             }
             if ($direction == SORT_ASC) {
-                if ($item[$attribute] < $currentValue) {
+                if (ArrayHelper::getValue($item, $attribute) < $currentValue) {
                     $this->expectExceptionMessage('Fail order!');
                 }
-                if ($item[$attribute] > $currentValue) {
-                    $currentValue = $item[$attribute];
+                if (ArrayHelper::getValue($item, $attribute) > $currentValue) {
+                    $currentValue = ArrayHelper::getValue($item, $attribute);
                 }
             } else {
-                if ($item[$attribute] > $currentValue) {
+                if (ArrayHelper::getValue($item, $attribute) > $currentValue) {
                     $this->expectExceptionMessage('Fail order!');
                 }
-                if ($item[$attribute] < $currentValue) {
-                    $currentValue = $item[$attribute];
+                if (ArrayHelper::getValue($item, $attribute) < $currentValue) {
+                    $currentValue = ArrayHelper::getValue($item, $attribute);
                 }
             }
         }
@@ -184,8 +195,10 @@ abstract class BaseRestTest extends WebTestCase
 
     protected function getGuzzleClient()
     {
+        $url = $this->baseUrl . '/' . $this->basePath;
+        $url = trim($url,  '/');
         $client = new Client([
-            'base_uri' => $this->baseUrl . '/' . $this->basePath,
+            'base_uri' => $url . '/',
         ]);
         return $client;
     }
