@@ -153,21 +153,23 @@ class BaseRestTest extends WebTestCase
     protected function assertPagination(ResponseInterface $response, $totalCount = null, $page = null, $pageSize = null)
     {
         $entity = new DataProviderEntity;
-        $entity->pageSize = $response->getHeader(HttpHeaderEnum::PER_PAGE)[0];
-        $entity->page = $response->getHeader(HttpHeaderEnum::CURRENT_PAGE)[0];
-        $entity->totalCount = $response->getHeader(HttpHeaderEnum::TOTAL_COUNT)[0];
+
+        $entity->setPageSize($response->getHeader(HttpHeaderEnum::PER_PAGE)[0]);
+        $entity->setPage($response->getHeader(HttpHeaderEnum::CURRENT_PAGE)[0]);
+        $entity->setTotalCount($response->getHeader(HttpHeaderEnum::TOTAL_COUNT)[0]);
+
         //$entity->pageCount = $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0];
 
         if ($page) {
-            $this->assertEquals($page, $entity->page);
+            $this->assertEquals($page, $entity->getPage());
         }
         if ($pageSize) {
-            $this->assertEquals($pageSize, $entity->pageSize);
+            $this->assertEquals($pageSize, $entity->getPageSize());
         }
         if ($totalCount) {
-            $this->assertEquals($totalCount, $entity->totalCount);
+            $this->assertEquals($totalCount, $entity->getTotalCount());
         }
-        $this->assertEquals($entity->pageCount, $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0]);
+        $this->assertEquals($entity->getPageCount(), $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0]);
     }
 
     protected function getBody(ResponseInterface $response)
