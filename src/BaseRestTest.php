@@ -12,7 +12,7 @@ use PhpLab\Sandbox\Web\Enums\HttpStatusCodeEnum;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class BaseRestTest extends WebTestCase
+abstract class BaseRestTest extends WebTestCase
 {
 
     protected $baseUrl;
