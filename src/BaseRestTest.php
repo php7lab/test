@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use php7extension\yii\helpers\ArrayHelper;
 use PhpLab\Domain\Data\DataProviderEntity;
+use PhpLab\Sandbox\Common\Helpers\StringHelper;
 use PhpLab\Sandbox\Web\Enums\HttpHeaderEnum;
 use PhpLab\Sandbox\Web\Enums\HttpMethodEnum;
 use PhpLab\Sandbox\Web\Enums\HttpStatusCodeEnum;
@@ -88,6 +89,10 @@ abstract class BaseRestTest extends WebTestCase
     protected function assertSubsetText(ResponseInterface $response, $actualString)
     {
         $body = $this->getBody($response);
+        //$body = StringHelper::removeAllSpace($body);
+        $body = StringHelper::filterChar($body, '#[^а-яА-ЯёЁa-zA-Z]+#u');
+        //$actualString = StringHelper::removeAllSpace($actualString);
+        $actualString= StringHelper::filterChar($actualString, '#[^а-яА-ЯёЁa-zA-Z]+#u');
         $isFail = mb_strpos($body, $actualString) === false;
         if($isFail) {
             $this->expectExceptionMessage('Subset string not found in text!');
