@@ -5,7 +5,7 @@ namespace PhpLab\Test;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\RequestOptions;
-use php7extension\yii\helpers\ArrayHelper;
+use PhpLab\Core\Legacy\Yii\Helpers\ArrayHelper;
 use PhpLab\Core\Common\Helpers\StringHelper;
 use PhpLab\Core\Domain\Data\DataProviderEntity;
 use PhpLab\Core\Web\Enums\HttpHeaderEnum;
