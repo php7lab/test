@@ -1,16 +1,16 @@
 <?php
 
-namespace PhpLab\Test;
+namespace PhpLab\Test\Base;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\RequestOptions;
-use PhpLab\Core\Legacy\Yii\Helpers\ArrayHelper;
 use PhpLab\Core\Common\Helpers\StringHelper;
-use PhpLab\Core\Domain\Data\DataProviderEntity;
+use PhpLab\Core\Legacy\Yii\Helpers\ArrayHelper;
 use PhpLab\Core\Web\Enums\HttpHeaderEnum;
 use PhpLab\Core\Web\Enums\HttpMethodEnum;
 use PhpLab\Core\Web\Enums\HttpStatusCodeEnum;
+use PhpLab\Test\Helpers\RestHelper;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
@@ -55,7 +55,7 @@ abstract class BaseRestTest extends TestCase
 
     protected function assertSubsetText(ResponseInterface $response, $actualString)
     {
-        $body = $this->getBody($response);
+        $body = RestHelper::getBody($response);
         //$body = StringHelper::removeAllSpace($body);
         $body = StringHelper::filterChar($body, '#[^а-яА-ЯёЁa-zA-Z]+#u');
         //$actualString = StringHelper::removeAllSpace($actualString);
@@ -69,14 +69,8 @@ abstract class BaseRestTest extends TestCase
 
     protected function assertBody(ResponseInterface $response, $actualBody)
     {
-        $body = $this->getBody($response);
+        $body = RestHelper::getBody($response);
         $this->assertArraySubset($actualBody, $body);
-    }
-
-    protected function getLastInsertId(ResponseInterface $response)
-    {
-        $entityId = $response->getHeader(HttpHeaderEnum::X_ENTITY_ID)[0];
-        return $entityId;
     }
 
     protected function assertCreated(ResponseInterface $response, $actualEntityId = null)
@@ -135,34 +129,17 @@ abstract class BaseRestTest extends TestCase
 
     protected function assertPagination(ResponseInterface $response, int $totalCount = null, int $page = null, int $pageSize = null)
     {
-        $entity = new DataProviderEntity;
-
-        $entity->setPageSize($response->getHeader(HttpHeaderEnum::PER_PAGE)[0]);
-        $entity->setPage($response->getHeader(HttpHeaderEnum::CURRENT_PAGE)[0]);
-        $entity->setTotalCount($response->getHeader(HttpHeaderEnum::TOTAL_COUNT)[0]);
-
-        //$entity->pageCount = $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0];
-
+        $dataProviderEntity = RestHelper::forgeDataProviderEntity($response);
         if ($page) {
-            $this->assertEquals($page, $entity->getPage());
+            $this->assertEquals($page, $dataProviderEntity->getPage());
         }
         if ($pageSize) {
-            $this->assertEquals($pageSize, $entity->getPageSize());
+            $this->assertEquals($pageSize, $dataProviderEntity->getPageSize());
         }
         if ($totalCount) {
-            $this->assertEquals($totalCount, $entity->getTotalCount());
+            $this->assertEquals($totalCount, $dataProviderEntity->getTotalCount());
         }
-        $this->assertEquals($entity->getPageCount(), $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0]);
-    }
-
-    protected function getBody(ResponseInterface $response)
-    {
-        $contentType = $response->getHeader('content-type')[0];
-        $body = $response->getBody()->getContents();
-        if ($contentType == 'application/json') {
-            $body = \GuzzleHttp\json_decode($response->getBody(), true);
-        }
-        return $body;
+        $this->assertEquals($dataProviderEntity->getPageCount(), $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0]);
     }
 
     protected function sendRequest(string $method, string $uri = '', array $options = []): ResponseInterface
@@ -179,9 +156,10 @@ abstract class BaseRestTest extends TestCase
     protected function getGuzzleClient(): Client
     {
         $baseUrl = $this->getBaseUrl();
-        $client = new Client([
+        $config = [
             'base_uri' => $baseUrl . '/',
-        ]);
+        ];
+        $client = new Client($config);
         return $client;
     }
 
