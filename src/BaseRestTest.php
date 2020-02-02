@@ -4,17 +4,17 @@ namespace PhpLab\Test;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\RequestOptions;
 use php7extension\yii\helpers\ArrayHelper;
-use PhpLab\Core\Domain\Data\DataProviderEntity;
 use PhpLab\Core\Common\Helpers\StringHelper;
+use PhpLab\Core\Domain\Data\DataProviderEntity;
 use PhpLab\Core\Web\Enums\HttpHeaderEnum;
 use PhpLab\Core\Web\Enums\HttpMethodEnum;
 use PhpLab\Core\Web\Enums\HttpStatusCodeEnum;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-abstract class BaseRestTest extends WebTestCase
+abstract class BaseRestTest extends TestCase
 {
 
     protected $baseUrl;
@@ -25,65 +25,32 @@ abstract class BaseRestTest extends WebTestCase
         $this->baseUrl = $_ENV['API_DOMAIN_URL'];
     }
 
-    protected function sendOptions($uri)
+    protected function sendOptions(string $uri): ResponseInterface
     {
-        $client = $this->getGuzzleClient();
-        try {
-            $response = $client->request(HttpMethodEnum::OPTIONS, $uri);
-        } catch (RequestException $e) {
-            $response = $e->getResponse();
-        }
-        return $response;
+        return $this->sendRequest(HttpMethodEnum::OPTIONS, $uri);
     }
 
-    protected function sendDelete($uri)
+    protected function sendDelete(string $uri): ResponseInterface
     {
-        $client = $this->getGuzzleClient();
-        try {
-            $response = $client->request(HttpMethodEnum::DELETE, $uri);
-        } catch (RequestException $e) {
-            $response = $e->getResponse();
-        }
-        return $response;
+        return $this->sendRequest(HttpMethodEnum::DELETE, $uri);
     }
 
-    protected function sendPost($uri, $body = [])
+    protected function sendPost(string $uri, array $body = [], string $paramName = RequestOptions::FORM_PARAMS): ResponseInterface
     {
-        $client = $this->getGuzzleClient();
-        try {
-            $response = $client->request(HttpMethodEnum::POST, $uri, [
-                \GuzzleHttp\RequestOptions::FORM_PARAMS => $body,
-            ]);
-        } catch (RequestException $e) {
-            $response = $e->getResponse();
-        }
-        return $response;
+        $options = [$paramName => $body];
+        return $this->sendRequest(HttpMethodEnum::POST, $uri, $options);
     }
 
-    protected function sendPut($uri, $body = [])
+    protected function sendPut(string $uri, array $body = [], string $paramName = RequestOptions::FORM_PARAMS): ResponseInterface
     {
-        $client = $this->getGuzzleClient();
-        try {
-            $response = $client->request(HttpMethodEnum::PUT, $uri, [
-                \GuzzleHttp\RequestOptions::FORM_PARAMS => $body,
-            ]);
-        } catch (RequestException $e) {
-            $response = $e->getResponse();
-        }
-        return $response;
+        $options = [$paramName => $body];
+        return $this->sendRequest(HttpMethodEnum::PUT, $uri, $options);
     }
 
-    protected function sendGet($uri, $query = [])
+    protected function sendGet(string $uri, array $query = [], string $paramName = RequestOptions::QUERY): ResponseInterface
     {
-        $client = $this->getGuzzleClient();
-        try {
-            $response = $client->request(HttpMethodEnum::GET, $uri, [
-                'query' => $query
-            ]);
-        } catch (RequestException $e) {
-            $response = $e->getResponse();
-        }
-        return $response;
+        $options = [$paramName => $query];
+        return $this->sendRequest(HttpMethodEnum::GET, $uri, $options);
     }
 
     protected function assertSubsetText(ResponseInterface $response, $actualString)
@@ -92,9 +59,9 @@ abstract class BaseRestTest extends WebTestCase
         //$body = StringHelper::removeAllSpace($body);
         $body = StringHelper::filterChar($body, '#[^а-яА-ЯёЁa-zA-Z]+#u');
         //$actualString = StringHelper::removeAllSpace($actualString);
-        $actualString= StringHelper::filterChar($actualString, '#[^а-яА-ЯёЁa-zA-Z]+#u');
+        $actualString = StringHelper::filterChar($actualString, '#[^а-яА-ЯёЁa-zA-Z]+#u');
         $isFail = mb_strpos($body, $actualString) === false;
-        if($isFail) {
+        if ($isFail) {
             $this->expectExceptionMessage('Subset string not found in text!');
         }
         $this->assertEquals(false, $isFail);
@@ -141,7 +108,7 @@ abstract class BaseRestTest extends WebTestCase
         }
     }
 
-    protected function assertOrder($collection, $attribute, $direction = SORT_ASC)
+    protected function assertOrder($collection, string $attribute, int $direction = SORT_ASC)
     {
         $currentValue = null;
         foreach ($collection as $item) {
@@ -166,7 +133,7 @@ abstract class BaseRestTest extends WebTestCase
         }
     }
 
-    protected function assertPagination(ResponseInterface $response, $totalCount = null, $page = null, $pageSize = null)
+    protected function assertPagination(ResponseInterface $response, int $totalCount = null, int $page = null, int $pageSize = null)
     {
         $entity = new DataProviderEntity;
 
@@ -198,24 +165,31 @@ abstract class BaseRestTest extends WebTestCase
         return $body;
     }
 
-    protected function getGuzzleClient()
+    protected function sendRequest(string $method, string $uri = '', array $options = []): ResponseInterface
     {
-        $url = $this->baseUrl . '/' . $this->basePath;
-        $url = trim($url,  '/');
+        $client = $this->getGuzzleClient();
+        try {
+            $response = $client->request($method, $uri, $options);
+        } catch (RequestException $e) {
+            $response = $e->getResponse();
+        }
+        return $response;
+    }
+
+    protected function getGuzzleClient(): Client
+    {
+        $baseUrl = $this->getBaseUrl();
         $client = new Client([
-            'base_uri' => $url . '/',
+            'base_uri' => $baseUrl . '/',
         ]);
         return $client;
     }
 
-    protected function sendRequest($uri, $method = HttpMethodEnum::GET)
+    private function getBaseUrl(): string
     {
-        $client = new Client([
-            'base_uri' => $this->baseUrl . '/' . $this->basePath,
-        ]);
-        $request = new Request($method, $uri);
-        $response = $client->send($request);
-        return $response;
+        $baseUrl = $this->baseUrl . '/' . $this->basePath;
+        $baseUrl = trim($baseUrl, '/');
+        return $baseUrl;
     }
 
 }
