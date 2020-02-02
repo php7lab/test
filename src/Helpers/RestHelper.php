@@ -2,7 +2,7 @@
 
 namespace PhpLab\Test\Helpers;
 
-use PhpLab\Core\Domain\Data\DataProviderEntity;
+use PhpLab\Core\Domain\Entities\DataProviderEntity;
 use PhpLab\Core\Enums\Web\HttpHeaderEnum;
 use Psr\Http\Message\ResponseInterface;
 
