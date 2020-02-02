@@ -3,7 +3,7 @@
 namespace PhpLab\Test\Helpers;
 
 use PhpLab\Core\Domain\Entities\DataProviderEntity;
-use PhpLab\Core\Enums\Web\HttpHeaderEnum;
+use PhpLab\Core\Enums\Http\HttpHeaderEnum;
 use Psr\Http\Message\ResponseInterface;
 
 class RestHelper
