@@ -6,11 +6,11 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use php7extension\yii\helpers\ArrayHelper;
-use PhpLab\Domain\Data\DataProviderEntity;
-use PhpLab\Sandbox\Common\Helpers\StringHelper;
-use PhpLab\Sandbox\Web\Enums\HttpHeaderEnum;
-use PhpLab\Sandbox\Web\Enums\HttpMethodEnum;
-use PhpLab\Sandbox\Web\Enums\HttpStatusCodeEnum;
+use PhpLab\Core\Domain\Data\DataProviderEntity;
+use PhpLab\Core\Common\Helpers\StringHelper;
+use PhpLab\Core\Web\Enums\HttpHeaderEnum;
+use PhpLab\Core\Web\Enums\HttpMethodEnum;
+use PhpLab\Core\Web\Enums\HttpStatusCodeEnum;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
