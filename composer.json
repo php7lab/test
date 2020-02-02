@@ -9,14 +9,18 @@
     }
   ],
   "minimum-stability": "dev",
-  "autoload": {
-    "psr-4": {
-      "PhpLab\\Test\\": "src",
-      "PhpLab\\Test\\Tests\\": "tests"
-    }
-  },
   "require": {
     "codeception/verify": "0.3.3",
     "phpunit/phpunit": "6.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "PhpLab\\Test\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "PhpLab\\Test\\Tests\\": "tests"
+    }
   }
 }
