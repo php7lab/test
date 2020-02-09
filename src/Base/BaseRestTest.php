@@ -163,7 +163,7 @@ abstract class BaseRestTest extends TestCase
         return $client;
     }
 
-    private function getBaseUrl(): string
+    protected function getBaseUrl(): string
     {
         $baseUrl = $this->baseUrl . '/' . $this->basePath;
         $baseUrl = trim($baseUrl, '/');
