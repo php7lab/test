@@ -21,7 +21,7 @@ class RestHelper
 
     static public function getBody(ResponseInterface $response)
     {
-        $contentType = $response->getHeader('content-type')[0];
+        $contentType = self::extractHeaderValue($response, 'content-type');
         $body = $response->getBody()->getContents();
         if ($contentType == 'application/json') {
             $body = \GuzzleHttp\json_decode($response->getBody(), true);
@@ -33,6 +33,13 @@ class RestHelper
     {
         $entityId = $response->getHeader(HttpHeaderEnum::X_ENTITY_ID)[0];
         return $entityId;
+    }
+
+    static private function extractHeaderValue(ResponseInterface $response, string $name, int $part = 0) {
+        $value = $response->getHeader($name)[0];
+        $parts = explode(';', $value);
+        $parts = array_map('trim', $parts);
+        return $parts[$part];
     }
 
 }
