@@ -4,6 +4,7 @@ namespace PhpLab\Test\Helpers;
 
 use PhpLab\Core\Domain\Entities\DataProviderEntity;
 use PhpLab\Core\Enums\Http\HttpHeaderEnum;
+use PhpLab\Core\Legacy\Yii\Helpers\ArrayHelper;
 use Psr\Http\Message\ResponseInterface;
 
 class RestHelper
@@ -17,6 +18,12 @@ class RestHelper
         $entity->setTotalCount($response->getHeader(HttpHeaderEnum::TOTAL_COUNT)[0]);
         //$entity->pageCount = $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0];
         return $entity;
+    }
+
+    static public function getBodyAttribute(ResponseInterface $response, $name)
+    {
+        $body = self::getBody($response);
+        return ArrayHelper::getValue($body, $name);
     }
 
     static public function getBody(ResponseInterface $response)
