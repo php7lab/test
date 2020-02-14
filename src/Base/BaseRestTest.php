@@ -5,22 +5,30 @@ namespace PhpLab\Test\Base;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\RequestOptions;
+use PhpLab\Core\Helpers\InstanceHelper;
 use PhpLab\Core\Helpers\StringHelper;
 use PhpLab\Core\Legacy\Yii\Helpers\ArrayHelper;
 use PhpLab\Core\Enums\Http\HttpHeaderEnum;
 use PhpLab\Core\Enums\Http\HttpMethodEnum;
 use PhpLab\Core\Enums\Http\HttpStatusCodeEnum;
 use PhpLab\Test\Helpers\RestHelper;
+use PhpLab\Test\Libs\FixtureLoader;
 use PhpLab\Test\Libs\RestAssert;
 use PhpLab\Test\Libs\RestClient;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use yii\test\Fixture;
 
 abstract class BaseRestTest extends TestCase
 {
 
     protected $baseUrl;
     protected $basePath = '/';
+
+    protected function fixtures(): array
+    {
+        return [];
+    }
 
     protected function getRestClient(): RestClient
     {
@@ -35,7 +43,15 @@ abstract class BaseRestTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->baseUrl = $_ENV['API_DOMAIN_URL'];
+        parent::setUp();
+        $fixtures = $this->fixtures();
+        if($fixtures) {
+            $fixtureLoader = new FixtureLoader;
+            $fixtureLoader->load($fixtures);
+        }
+        $baseUrl = $_ENV['API_DOMAIN_URL'];
+        $baseUrl = rtrim($baseUrl, '/');
+        $this->baseUrl = $baseUrl;
     }
 
     /**
@@ -187,9 +203,6 @@ abstract class BaseRestTest extends TestCase
         }
         $this->assertEquals($dataProviderEntity->getPageCount(), $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0]);
     }
-
-
-
 
     protected function sendRequest(string $method, string $uri = '', array $options = []): ResponseInterface
     {

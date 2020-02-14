@@ -30,12 +30,16 @@ class RestClient
             'login' => $login,
             'password' => $password,
         ]);
-        $token = RestHelper::getBodyAttribute($response, 'token');
-        return $token;
+        $this->authToken = RestHelper::getBodyAttribute($response, 'token');
+        return $this;
     }
 
     public function setAuthToken(string $authToken) {
         $this->authToken = $authToken;
+    }
+
+    public function getAuthToken() {
+        return $this->authToken;
     }
 
     public function sendOptions(string $uri): ResponseInterface
