@@ -4,10 +4,12 @@ namespace PhpLab\Test\Libs;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
 use PhpLab\Core\Domain\Entities\DataProviderEntity;
 use PhpLab\Core\Enums\Http\HttpHeaderEnum;
 use PhpLab\Core\Enums\Http\HttpMethodEnum;
+use PhpLab\Core\Enums\Http\HttpStatusCodeEnum;
 use PhpLab\Core\Legacy\Yii\Helpers\ArrayHelper;
 use PhpLab\Test\Helpers\RestHelper;
 use PHPUnit\Framework\TestCase;
@@ -35,6 +37,23 @@ class RestAssert
             $this->testCase->expectExceptionMessage('Subset string not found in text!');
         }
         $this->testCase->assertEquals(false, $isFail);
+    }
+
+    public function assertStatusOk(ResponseInterface $response, int $actualStatus = null)
+    {
+        $statusCode = $response->getStatusCode();
+        if($actualStatus) {
+            $this->testCase->assertEquals($actualStatus, $statusCode);
+        } else {
+            $this->testCase->assertTrue($statusCode < 300 && $statusCode >= 200);
+        }
+    }
+
+    public function assertCollection(ResponseInterface $response, $actualBody)
+    {
+        $this->assertStatusOk($response, HttpStatusCodeEnum::OK);
+        //$this->assertPagination($response, null, 1, 20);
+        $this->assertBody($response, $actualBody);
     }
 
     public function assertBody(ResponseInterface $response, $actualBody)
@@ -72,8 +91,9 @@ class RestAssert
         }
     }
 
-    public function assertOrder($collection, string $attribute, int $direction = SORT_ASC)
+    public function assertOrder(ResponseInterface $response, string $attribute, int $direction = SORT_ASC)
     {
+        $collection = RestHelper::getBody($response);
         $currentValue = null;
         foreach ($collection as $item) {
             if ($currentValue === null) {
