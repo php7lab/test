@@ -124,10 +124,10 @@ abstract class BaseRestTest extends TestCase
     /**
      * @deprecated use $this->getRestAssert()->assertBody()
      */
-    protected function assertBody(ResponseInterface $response, $actualBody)
+    protected function assertBody(ResponseInterface $response, $expectedBody)
     {
         $body = RestHelper::getBody($response);
-        $this->assertArraySubset($actualBody, $body);
+        $this->assertArraySubset($expectedBody, $body);
     }
 
     /**

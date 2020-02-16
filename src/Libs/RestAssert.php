@@ -33,9 +33,9 @@ class RestAssert extends TestCase
                 if(empty($item['field']) || empty($item['message'])) {
                     $this->expectExceptionMessage('Invalid errors array!');
                 }
-                $actualBody[] = $item['field'];
+                $expectedBody[] = $item['field'];
             }
-            $this->assertEquals($fieldNames, $actualBody);
+            $this->assertEquals($fieldNames, $expectedBody);
         }
         $this->assertStatusCode(HttpStatusCodeEnum::UNPROCESSABLE_ENTITY);
         return $this;
