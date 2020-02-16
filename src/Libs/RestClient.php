@@ -42,31 +42,46 @@ class RestClient
         return $this->authToken;
     }
 
-    public function sendOptions(string $uri): ResponseInterface
+    public function sendOptions(string $uri, array $headers = []): ResponseInterface
     {
-        return $this->sendRequest(HttpMethodEnum::OPTIONS, $uri);
+        $options = [
+            RequestOptions::HEADERS => $headers,
+        ];
+        return $this->sendRequest(HttpMethodEnum::OPTIONS, $uri, $options);
     }
 
-    public function sendDelete(string $uri): ResponseInterface
+    public function sendDelete(string $uri, array $headers = []): ResponseInterface
     {
-        return $this->sendRequest(HttpMethodEnum::DELETE, $uri);
+        $options = [
+            RequestOptions::HEADERS => $headers,
+        ];
+        return $this->sendRequest(HttpMethodEnum::DELETE, $uri, $options);
     }
 
-    public function sendPost(string $uri, array $body = [], string $paramName = RequestOptions::FORM_PARAMS): ResponseInterface
+    public function sendPost(string $uri, array $body = [], array $headers = []): ResponseInterface
     {
-        $options = [$paramName => $body];
+        $options = [
+            RequestOptions::FORM_PARAMS => $body,
+            RequestOptions::HEADERS => $headers,
+        ];
         return $this->sendRequest(HttpMethodEnum::POST, $uri, $options);
     }
 
-    public function sendPut(string $uri, array $body = [], string $paramName = RequestOptions::FORM_PARAMS): ResponseInterface
+    public function sendPut(string $uri, array $body = [], array $headers = []): ResponseInterface
     {
-        $options = [$paramName => $body];
+        $options = [
+            RequestOptions::FORM_PARAMS => $body,
+            RequestOptions::HEADERS => $headers,
+        ];
         return $this->sendRequest(HttpMethodEnum::PUT, $uri, $options);
     }
 
-    public function sendGet(string $uri, array $query = [], string $paramName = RequestOptions::QUERY): ResponseInterface
+    public function sendGet(string $uri, array $query = [], array $headers = []): ResponseInterface
     {
-        $options = [$paramName => $query];
+        $options = [
+            RequestOptions::QUERY => $query,
+            RequestOptions::HEADERS => $headers,
+        ];
         return $this->sendRequest(HttpMethodEnum::GET, $uri, $options);
     }
 

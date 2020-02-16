@@ -30,15 +30,22 @@ abstract class BaseRestTest extends TestCase
         return [];
     }
 
+    protected function send(): RestAssert
+    {
+        $guzzleClient = $this->getGuzzleClient();
+        $restClient = new RestClient($guzzleClient);
+        $restClient->sendRequest($method, $uri, $options);
+    }
+
     protected function getRestClient(): RestClient
     {
         $guzzleClient = $this->getGuzzleClient();
         return new RestClient($guzzleClient);
     }
 
-    protected function getRestAssert(): RestAssert
+    protected function getRestAssert(ResponseInterface $response = null): RestAssert
     {
-        return new RestAssert($this);
+        return new RestAssert($response);
     }
 
     protected function setUp(): void

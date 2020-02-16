@@ -15,18 +15,35 @@ use PhpLab\Test\Helpers\RestHelper;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
-class RestAssert
+class RestAssert extends TestCase
 {
 
-    private $testCase;
+    private $response;
 
-    public function __construct(TestCase $testCase)
+    public function __construct(ResponseInterface $response = null)
     {
-        $this->testCase = $testCase;
+        $this->response = $response;
     }
 
-    public function assertSubsetText(ResponseInterface $response, $actualString)
+    public function assertUnprocessableEntity(array $fieldNames = [])
     {
+        if($fieldNames) {
+            $body = RestHelper::getBody($this->response);
+            foreach ($body as $item) {
+                if(empty($item['field']) || empty($item['message'])) {
+                    $this->expectExceptionMessage('Invalid errors array!');
+                }
+                $actualBody[] = $item['field'];
+            }
+            $this->assertEquals($fieldNames, $actualBody);
+        }
+        $this->assertStatusCode(HttpStatusCodeEnum::UNPROCESSABLE_ENTITY);
+        return $this;
+    }
+    
+    public function assertSubsetText($actualString, ResponseInterface $response = null)
+    {
+        $response = $response ?? $this->response;
         $body = RestHelper::getBody($response);
         //$body = StringHelper::removeAllSpace($body);
         $body = StringHelper::filterChar($body, '#[^а-яА-ЯёЁa-zA-Z]+#u');
@@ -34,65 +51,77 @@ class RestAssert
         $actualString = StringHelper::filterChar($actualString, '#[^а-яА-ЯёЁa-zA-Z]+#u');
         $isFail = mb_strpos($body, $actualString) === false;
         if ($isFail) {
-            $this->testCase->expectExceptionMessage('Subset string not found in text!');
+            $this->expectExceptionMessage('Subset string not found in text!');
         }
-        $this->testCase->assertEquals(false, $isFail);
+        $this->assertEquals(false, $isFail);
+        return $this;
     }
 
-    public function assertStatusOk(ResponseInterface $response, int $actualStatus = null)
+    public function assertStatusCode(int $actualStatus = null, ResponseInterface $response = null)
     {
+        $response = $response ?? $this->response;
         $statusCode = $response->getStatusCode();
         if($actualStatus) {
-            $this->testCase->assertEquals($actualStatus, $statusCode);
+            $this->assertEquals($actualStatus, $statusCode);
         } else {
-            $this->testCase->assertTrue($statusCode < 300 && $statusCode >= 200);
+            $this->assertTrue($statusCode < 300 && $statusCode >= 200);
         }
+        return $this;
     }
 
-    public function assertCollection(ResponseInterface $response, $actualBody)
+    public function assertCollection($expectedBody, ResponseInterface $response = null)
     {
-        $this->assertStatusOk($response, HttpStatusCodeEnum::OK);
+        $response = $response ?? $this->response;
+        //$this->assertStatusCode(HttpStatusCodeEnum::OK, $response);
         //$this->assertPagination($response, null, 1, 20);
-        $this->assertBody($response, $actualBody);
+        $this->assertBody($response, $expectedBody);
+        return $this;
     }
 
-    public function assertBody(ResponseInterface $response, $actualBody)
+    public function assertBody($expectedBody, ResponseInterface $response = null)
     {
+        $response = $response ?? $this->response;
         $body = RestHelper::getBody($response);
-        $this->testCase->assertArraySubset($actualBody, $body);
+        $this->assertArraySubset($expectedBody, $body);
+        return $this;
     }
 
-    public function assertCreated(ResponseInterface $response, $actualEntityId = null)
+    public function assertCreated($actualEntityId = null, ResponseInterface $response = null)
     {
-        $this->testCase->assertEquals(HttpStatusCodeEnum::CREATED, $response->getStatusCode());
+        $response = $response ?? $this->response;
+        $this->assertEquals(HttpStatusCodeEnum::CREATED, $response->getStatusCode());
         $entityId = $response->getHeader(HttpHeaderEnum::X_ENTITY_ID)[0];
-        $this->testCase->assertNotEmpty($entityId);
+        $this->assertNotEmpty($entityId);
         if ($actualEntityId) {
-            $this->testCase->assertEquals($actualEntityId, $entityId);
+            $this->assertEquals($actualEntityId, $entityId);
         }
+        return $this;
     }
 
-    public function assertCors(ResponseInterface $response, $origin, $headers = null, $methods = null)
+    public function assertCors($origin, $headers = null, $methods = null, ResponseInterface $response = null)
     {
+        $response = $response ?? $this->response;
         $actualOrigin = $response->getHeader(HttpHeaderEnum::ACCESS_CONTROL_ALLOW_ORIGIN)[0] ?? null;
         $actualHeaders = $response->getHeader(HttpHeaderEnum::ACCESS_CONTROL_ALLOW_HEADERS)[0] ?? null;
         $actualMethods = $response->getHeader(HttpHeaderEnum::ACCESS_CONTROL_ALLOW_METHODS)[0] ?? null;
 
-        $this->testCase->assertEquals($origin, $actualOrigin);
+        $this->assertEquals($origin, $actualOrigin);
 
         if ($headers) {
-            $this->testCase->assertEquals($headers, $actualHeaders);
+            $this->assertEquals($headers, $actualHeaders);
         }
         if ($methods) {
             $arr = explode(',', $actualMethods);
             $arr = array_map('trim', $arr);
             $diff = array_diff($methods, $arr);
-            $this->testCase->assertEmpty($diff, 'Diff: ' . implode(',', $diff));
+            $this->assertEmpty($diff, 'Diff: ' . implode(',', $diff));
         }
+        return $this;
     }
 
-    public function assertOrder(ResponseInterface $response, string $attribute, int $direction = SORT_ASC)
+    public function assertOrder(string $attribute, int $direction = SORT_ASC, ResponseInterface $response = null)
     {
+        $response = $response ?? $this->response;
         $collection = RestHelper::getBody($response);
         $currentValue = null;
         foreach ($collection as $item) {
@@ -101,35 +130,38 @@ class RestAssert
             }
             if ($direction == SORT_ASC) {
                 if (ArrayHelper::getValue($item, $attribute) < $currentValue) {
-                    $this->testCase->expectExceptionMessage('Fail order!');
+                    $this->expectExceptionMessage('Fail order!');
                 }
                 if (ArrayHelper::getValue($item, $attribute) > $currentValue) {
                     $currentValue = ArrayHelper::getValue($item, $attribute);
                 }
             } else {
                 if (ArrayHelper::getValue($item, $attribute) > $currentValue) {
-                    $this->testCase->expectExceptionMessage('Fail order!');
+                    $this->expectExceptionMessage('Fail order!');
                 }
                 if (ArrayHelper::getValue($item, $attribute) < $currentValue) {
                     $currentValue = ArrayHelper::getValue($item, $attribute);
                 }
             }
         }
+        return $this;
     }
 
-    public function assertPagination(ResponseInterface $response, int $totalCount = null, int $page = null, int $pageSize = null)
+    public function assertPagination(int $totalCount = null, int $page = null, int $pageSize = null, ResponseInterface $response = null)
     {
+        $response = $response ?? $this->response;
         $dataProviderEntity = RestHelper::forgeDataProviderEntity($response);
         if ($page) {
-            $this->testCase->assertEquals($page, $dataProviderEntity->getPage());
+            $this->assertEquals($page, $dataProviderEntity->getPage());
         }
         if ($pageSize) {
-            $this->testCase->assertEquals($pageSize, $dataProviderEntity->getPageSize());
+            $this->assertEquals($pageSize, $dataProviderEntity->getPageSize());
         }
         if ($totalCount) {
-            $this->testCase->assertEquals($totalCount, $dataProviderEntity->getTotalCount());
+            $this->assertEquals($totalCount, $dataProviderEntity->getTotalCount());
         }
-        $this->testCase->assertEquals($dataProviderEntity->getPageCount(), $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0]);
+        $this->assertEquals($dataProviderEntity->getPageCount(), $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0]);
+        return $this;
     }
 
 }
