@@ -8,6 +8,7 @@ use GuzzleHttp\RequestOptions;
 use PhpLab\Core\Domain\Entities\DataProviderEntity;
 use PhpLab\Core\Enums\Http\HttpHeaderEnum;
 use PhpLab\Core\Enums\Http\HttpMethodEnum;
+use PhpLab\Core\Enums\Http\HttpStatusCodeEnum;
 use PhpLab\Core\Legacy\Yii\Helpers\ArrayHelper;
 use PhpLab\Core\Legacy\Yii\Helpers\FileHelper;
 use PhpLab\Test\Helpers\RestHelper;
@@ -41,15 +42,6 @@ class RestClient
 
     public function logout() {
         $this->currentAuth = [];
-    }
-
-    public function setAuthToken(string $authToken) {
-
-        /** @var CacheItem $cacheItem */
-        $cacheItem = $this->authCache->getItem('token_by_login_' . $this->currentAuth['login']);
-        $cacheItem->set($authToken);
-        $this->authCache->save($cacheItem);
-        return $this;
     }
 
     public function sendOptions(string $uri, array $headers = []): ResponseInterface
@@ -108,8 +100,7 @@ class RestClient
             $response = $this->guzzleClient->request($method, $uri, $options);
         } catch (RequestException $e) {
             $response = $e->getResponse();
-            if($response->getStatusCode() == 401 && $refreshAuthToken) {
-                //dd(401);
+            if($response->getStatusCode() == HttpStatusCodeEnum::UNAUTHORIZED && $refreshAuthToken) {
                 $this->authorization();
                 return $this->sendRequest($method, $uri, $options, false);
             }
@@ -131,6 +122,14 @@ class RestClient
         } else {
             return $this->authorization();
         }
+    }
+
+    private function setAuthToken(string $authToken) {
+        /** @var CacheItem $cacheItem */
+        $cacheItem = $this->authCache->getItem('token_by_login_' . $this->currentAuth['login']);
+        $cacheItem->set($authToken);
+        $this->authCache->save($cacheItem);
+        return $this;
     }
 
     private function authorization() {
