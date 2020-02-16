@@ -49,7 +49,7 @@ abstract class BaseRestTest extends TestCase
             $fixtureLoader = new FixtureLoader;
             $fixtureLoader->load($fixtures);
         }
-        $baseUrl = $_ENV['API_DOMAIN_URL'];
+        $baseUrl = $_ENV['API_URL'];
         $baseUrl = rtrim($baseUrl, '/');
         $this->baseUrl = $baseUrl;
     }
