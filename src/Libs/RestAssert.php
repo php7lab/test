@@ -14,12 +14,20 @@ class RestAssert extends TestCase
 {
 
     private $response;
+    private $rawBody;
     private $body;
 
     public function __construct(ResponseInterface $response = null)
     {
         $this->response = $response;
-        $this->body = RestHelper::getBody($this->response);
+        $this->rawBody = $response->getBody()->getContents();
+        //dd($this->rawBody);
+        $this->body = RestHelper::getBody(clone $this->response, $this->rawBody);
+    }
+
+    public function getRawBody()
+    {
+        return $this->rawBody;
     }
 
     public function assertUnprocessableEntity(array $fieldNames = [])
@@ -40,11 +48,11 @@ class RestAssert extends TestCase
     public function assertSubsetText($actualString, ResponseInterface $response = null)
     {
         $response = $response ?? $this->response;
-        $body = $response->getBody()->getContents();
         //$body = StringHelper::removeAllSpace($body);
-        $body = StringHelper::filterChar($body, '#[^а-яА-ЯёЁa-zA-Z]+#u');
+        $exp = '#[^а-яА-ЯёЁa-zA-Z]+#u';
+        $body = StringHelper::filterChar($this->rawBody, $exp);
         //$actualString = StringHelper::removeAllSpace($actualString);
-        $actualString = StringHelper::filterChar($actualString, '#[^а-яА-ЯёЁa-zA-Z]+#u');
+        $actualString = StringHelper::filterChar($actualString, $exp);
         $isFail = mb_strpos($body, $actualString) === false;
         if ($isFail) {
             $this->expectExceptionMessage('Subset string not found in text!');

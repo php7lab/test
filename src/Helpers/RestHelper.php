@@ -28,16 +28,15 @@ class RestHelper
         return ArrayHelper::getValue($body, $name);
     }
 
-    static public function getBody(ResponseInterface $response)
+    static public function getBody(ResponseInterface $response, string $body)
     {
         $contentType = self::extractHeaderValue($response, 'content-type');
-        //$body = $response->getBody()->getContents();
         $extension = self::mimeToFileExtension($contentType);
-        if($extension == 'php') {
+        if($extension == 'php' || empty($extension)) {
             $extension = 'html';
         }
         $encoder = new Store($extension);
-        $body = $encoder->decode($response->getBody());
+        $body = $encoder->decode($body);
         return $body;
     }
 
@@ -52,7 +51,7 @@ class RestHelper
         $value = $response->getHeader($name)[0];
         $parts = explode(';', $value);
         $parts = array_map('trim', $parts);
-        return $parts[$part];
+        return strtolower($parts[$part]);
     }
 
     static private function mimeToFileExtension(string $contentType, string $default = 'html'): string {
