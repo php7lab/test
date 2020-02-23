@@ -36,10 +36,10 @@ class RestHelper
         return $body;
     }
 
-    static public function getLastInsertId(ResponseInterface $response)
+    static public function getLastInsertId(ResponseInterface $response): int
     {
         $entityId = $response->getHeader(HttpHeaderEnum::X_ENTITY_ID)[0];
-        return $entityId;
+        return intval($entityId);
     }
 
     static private function extractHeaderValue(ResponseInterface $response, string $name, int $part = 0) {
