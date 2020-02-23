@@ -2,14 +2,9 @@
 
 namespace PhpLab\Test\Libs;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\RequestOptions;
-use PhpLab\Core\Domain\Entities\DataProviderEntity;
 use PhpLab\Core\Enums\Http\HttpHeaderEnum;
-use PhpLab\Core\Enums\Http\HttpMethodEnum;
 use PhpLab\Core\Enums\Http\HttpStatusCodeEnum;
+use PhpLab\Core\Helpers\StringHelper;
 use PhpLab\Core\Legacy\Yii\Helpers\ArrayHelper;
 use PhpLab\Test\Helpers\RestHelper;
 use PHPUnit\Framework\TestCase;
@@ -27,10 +22,10 @@ class RestAssert extends TestCase
 
     public function assertUnprocessableEntity(array $fieldNames = [])
     {
-        if($fieldNames) {
+        if ($fieldNames) {
             $body = RestHelper::getBody($this->response);
             foreach ($body as $item) {
-                if(empty($item['field']) || empty($item['message'])) {
+                if (empty($item['field']) || empty($item['message'])) {
                     $this->expectExceptionMessage('Invalid errors array!');
                 }
                 $expectedBody[] = $item['field'];
@@ -40,11 +35,11 @@ class RestAssert extends TestCase
         $this->assertStatusCode(HttpStatusCodeEnum::UNPROCESSABLE_ENTITY);
         return $this;
     }
-    
+
     public function assertSubsetText($actualString, ResponseInterface $response = null)
     {
         $response = $response ?? $this->response;
-        $body = RestHelper::getBody($response);
+        $body = $response->getBody()->getContents();
         //$body = StringHelper::removeAllSpace($body);
         $body = StringHelper::filterChar($body, '#[^а-яА-ЯёЁa-zA-Z]+#u');
         //$actualString = StringHelper::removeAllSpace($actualString);
@@ -61,7 +56,7 @@ class RestAssert extends TestCase
     {
         $response = $response ?? $this->response;
         $statusCode = $response->getStatusCode();
-        if($actualStatus) {
+        if ($actualStatus) {
             $this->assertEquals($actualStatus, $statusCode);
         } else {
             $this->assertTrue($statusCode < 300 && $statusCode >= 200);
