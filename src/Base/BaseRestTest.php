@@ -19,16 +19,11 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use yii\test\Fixture;
 
-abstract class BaseRestTest extends TestCase
+abstract class BaseRestTest extends BaseTest
 {
 
     protected $baseUrl;
     protected $basePath = '/';
-
-    protected function fixtures(): array
-    {
-        return [];
-    }
 
     protected function send(): RestAssert
     {
@@ -51,11 +46,6 @@ abstract class BaseRestTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $fixtures = $this->fixtures();
-        if($fixtures) {
-            $fixtureLoader = new FixtureLoader;
-            $fixtureLoader->load($fixtures);
-        }
         $baseUrl = $_ENV['API_URL'];
         $baseUrl = rtrim($baseUrl, '/');
         $this->baseUrl = $baseUrl;

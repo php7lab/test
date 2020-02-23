@@ -2,9 +2,9 @@
 
 namespace PhpLab\Test\Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
+use PhpLab\Test\Base\BaseTest;
 
-final class ExampleTest extends TestCase {
+final class ExampleTest extends BaseTest {
 
     public function testExample() {
         $this->assertSame(1, 1);
