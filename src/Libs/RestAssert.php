@@ -14,17 +14,18 @@ class RestAssert extends TestCase
 {
 
     private $response;
+    private $body;
 
     public function __construct(ResponseInterface $response = null)
     {
         $this->response = $response;
+        $this->body = RestHelper::getBody($this->response);
     }
 
     public function assertUnprocessableEntity(array $fieldNames = [])
     {
         if ($fieldNames) {
-            $body = RestHelper::getBody($this->response);
-            foreach ($body as $item) {
+            foreach ($this->body as $item) {
                 if (empty($item['field']) || empty($item['message'])) {
                     $this->expectExceptionMessage('Invalid errors array!');
                 }
@@ -76,8 +77,7 @@ class RestAssert extends TestCase
     public function assertBody($expectedBody, ResponseInterface $response = null)
     {
         $response = $response ?? $this->response;
-        $body = RestHelper::getBody($response);
-        $this->assertArraySubset($expectedBody, $body);
+        $this->assertArraySubset($expectedBody, $this->body);
         return $this;
     }
 
@@ -117,7 +117,7 @@ class RestAssert extends TestCase
     public function assertOrder(string $attribute, int $direction = SORT_ASC, ResponseInterface $response = null)
     {
         $response = $response ?? $this->response;
-        $collection = RestHelper::getBody($response);
+        $collection = $this->body;
         $currentValue = null;
         foreach ($collection as $item) {
             if ($currentValue === null) {

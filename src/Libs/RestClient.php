@@ -24,7 +24,7 @@ class RestClient
         $this->setAuthAgent($authAgent);
     }
 
-    public function getAuthAgent(): AuthAgentInterface
+    public function getAuthAgent(): ?AuthAgentInterface
     {
         return $this->authAgent;
     }

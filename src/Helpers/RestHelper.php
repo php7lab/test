@@ -5,6 +5,8 @@ namespace PhpLab\Test\Helpers;
 use PhpLab\Core\Domain\Entities\DataProviderEntity;
 use PhpLab\Core\Enums\Http\HttpHeaderEnum;
 use PhpLab\Core\Legacy\Yii\Helpers\ArrayHelper;
+use PhpLab\Core\Legacy\Yii\Helpers\FileHelper;
+use PhpLab\Core\Libs\Store\Store;
 use Psr\Http\Message\ResponseInterface;
 
 class RestHelper
@@ -29,10 +31,13 @@ class RestHelper
     static public function getBody(ResponseInterface $response)
     {
         $contentType = self::extractHeaderValue($response, 'content-type');
-        $body = $response->getBody()->getContents();
-        if ($contentType == 'application/json') {
-            $body = \GuzzleHttp\json_decode($response->getBody(), true);
+        //$body = $response->getBody()->getContents();
+        $extension = self::mimeToFileExtension($contentType);
+        if($extension == 'php') {
+            $extension = 'html';
         }
+        $encoder = new Store($extension);
+        $body = $encoder->decode($response->getBody());
         return $body;
     }
 
@@ -50,4 +55,10 @@ class RestHelper
         return $parts[$part];
     }
 
+    static private function mimeToFileExtension(string $contentType, string $default = 'html'): string {
+        $mimeTypes = include FileHelper::path('vendor/php7lab/core/src/Legacy/Yii/Helpers/mimeTypes.php');
+        $mimeTypes = array_flip($mimeTypes);
+        $extension = ArrayHelper::getValue($mimeTypes, $contentType, $default);
+        return strtolower($extension);
+    }
 }
