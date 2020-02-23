@@ -4,6 +4,7 @@ namespace PhpLab\Test\Base;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use PhpLab\Test\Libs\AuthAgent;
 use PhpLab\Test\Libs\RestAssert;
 use PhpLab\Test\Libs\RestClient;
 use Psr\Http\Message\ResponseInterface;
@@ -17,7 +18,8 @@ abstract class BaseRestTest extends BaseTest
     protected function getRestClient(): RestClient
     {
         $guzzleClient = $this->getGuzzleClient();
-        return new RestClient($guzzleClient);
+        $authAgent = new AuthAgent($guzzleClient);
+        return new RestClient($guzzleClient, $authAgent);
     }
 
     protected function getRestAssert(ResponseInterface $response = null): RestAssert
