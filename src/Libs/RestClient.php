@@ -8,6 +8,7 @@ use GuzzleHttp\RequestOptions;
 use PhpLab\Core\Enums\Http\HttpHeaderEnum;
 use PhpLab\Core\Enums\Http\HttpMethodEnum;
 use PhpLab\Core\Enums\Http\HttpStatusCodeEnum;
+use PhpLab\Test\Interfaces\AuthAgentInterface;
 use Psr\Http\Message\ResponseInterface;
 
 class RestClient
@@ -17,18 +18,18 @@ class RestClient
     private $accept = 'application/json';
     private $authAgent;
 
-    public function __construct(Client $guzzleClient, AuthAgent $authAgent = null)
+    public function __construct(Client $guzzleClient, AuthAgentInterface $authAgent = null)
     {
         $this->guzzleClient = $guzzleClient;
         $this->setAuthAgent($authAgent);
     }
 
-    public function getAuthAgent(): AuthAgent
+    public function getAuthAgent(): AuthAgentInterface
     {
         return $this->authAgent;
     }
 
-    public function setAuthAgent(AuthAgent $authAgent = null)
+    public function setAuthAgent(AuthAgentInterface $authAgent = null)
     {
         $this->authAgent = $authAgent;
     }
@@ -89,7 +90,7 @@ class RestClient
             $response = $this->guzzleClient->request($method, $uri, $options);
         } catch (RequestException $e) {
             $response = $e->getResponse();
-            if(is_object($this->authAgent)) {
+            if (is_object($this->authAgent)) {
                 if ($response->getStatusCode() == HttpStatusCodeEnum::UNAUTHORIZED && $refreshAuthToken) {
                     $this->authAgent->authorization();
                     return $this->sendRequest($method, $uri, $options, false);

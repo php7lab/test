@@ -8,10 +8,11 @@ use PhpLab\Core\Enums\Http\HttpMethodEnum;
 use PhpLab\Core\Legacy\Yii\Helpers\FileHelper;
 use PhpLab\Core\Libs\Env\EnvConfigException;
 use PhpLab\Test\Helpers\RestHelper;
+use PhpLab\Test\Interfaces\AuthAgentInterface;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\CacheItem;
 
-class AuthAgent
+class AuthAgent implements AuthAgentInterface
 {
 
     private $guzzleClient;
@@ -29,7 +30,7 @@ class AuthAgent
         $this->authCache = new FilesystemAdapter('test', 0, $cacheDirectory);
     }
 
-    public function authByLogin(string $login, string $password = 'Wwwqqq111')
+    public function authByLogin(string $login, string $password = 'Wwwqqq111'): AuthAgentInterface
     {
         $this->currentAuth = [
             'login' => $login,
@@ -38,9 +39,10 @@ class AuthAgent
         return $this;
     }
 
-    public function logout()
+    public function logout(): AuthAgentInterface
     {
         $this->currentAuth = [];
+        return $this;
     }
 
     public function getAuthToken(): ?string
@@ -79,7 +81,6 @@ class AuthAgent
         $cacheItem = $this->authCache->getItem('token_by_login_' . $this->currentAuth['login']);
         $cacheItem->set($authToken);
         $this->authCache->save($cacheItem);
-        return $this;
     }
 
 }
