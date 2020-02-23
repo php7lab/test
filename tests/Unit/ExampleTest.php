@@ -1,6 +1,6 @@
 <?php
 
-namespace PhpLab\Bundle\Tests\Unit;
+namespace PhpLab\Test\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 
