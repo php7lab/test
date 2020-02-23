@@ -30,6 +30,11 @@ class RestAssert extends TestCase
         return $this->rawBody;
     }
 
+    public function getBody()
+    {
+        return $this->body;
+    }
+
     public function assertUnprocessableEntity(array $fieldNames = [])
     {
         if ($fieldNames) {

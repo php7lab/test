@@ -24,7 +24,7 @@ class RestHelper
 
     static public function getBodyAttribute(ResponseInterface $response, $name)
     {
-        $body = self::getBody($response);
+        $body = RestHelper::getBody($response, $response->getBody()->getContents());
         return ArrayHelper::getValue($body, $name);
     }
 
