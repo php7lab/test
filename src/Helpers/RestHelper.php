@@ -46,11 +46,20 @@ class RestHelper
         return intval($entityId);
     }
 
-    static private function extractHeaderValue(ResponseInterface $response, string $name, int $part = 0)
+    public static function extractHeaderValues(ResponseInterface $response, string $name)
     {
-        $value = $response->getHeader($name)[0];
-        $parts = explode(';', $value);
+        $value = $response->getHeader($name);
+        if(empty($value)) {
+            return [];
+        }
+        $parts = explode(';', $value[0]);
         $parts = array_map('trim', $parts);
+        return $parts;
+    }
+
+    public static function extractHeaderValue(ResponseInterface $response, string $name, int $part = 0)
+    {
+        $parts = self::extractHeaderValues($response, $name);
         return strtolower($parts[$part]);
     }
 
