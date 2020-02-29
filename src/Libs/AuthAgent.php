@@ -4,6 +4,7 @@ namespace PhpLab\Test\Libs;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use PhpLab\Core\Enums\Http\HttpHeaderEnum;
 use PhpLab\Core\Enums\Http\HttpMethodEnum;
 use PhpLab\Core\Legacy\Yii\Helpers\FileHelper;
 use PhpLab\Core\Libs\Env\EnvConfigException;
@@ -70,7 +71,8 @@ class AuthAgent implements AuthAgentInterface
             ],
         ];
         $response = $this->guzzleClient->request(HttpMethodEnum::POST, $this->authUri, $options);
-        $authToken = RestHelper::getBodyAttribute($response, 'token');
+        //$authToken = RestHelper::getBodyAttribute($response, 'token');
+        $authToken = $response->getHeader(HttpHeaderEnum::AUTHORIZATION)[0];
         $this->setAuthToken($authToken);
         return $authToken;
     }
