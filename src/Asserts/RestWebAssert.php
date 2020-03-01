@@ -14,6 +14,12 @@ use Psr\Http\Message\ResponseInterface;
 class RestWebAssert extends RestAssert
 {
 
+    public function __construct(ResponseInterface $response = null)
+    {
+        parent::__construct($response);
+        $this->body = $this->rawBody;
+    }
+
     public function assertSubsetText($actualString, ResponseInterface $response = null)
     {
         $response = $response ?? $this->response;

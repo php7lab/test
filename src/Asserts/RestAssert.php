@@ -22,7 +22,6 @@ class RestAssert extends TestCase
     {
         $this->response = $response;
         $this->rawBody = $response->getBody()->getContents();
-        $this->body = RestResponseHelper::getBody(clone $this->response, $this->rawBody);
     }
 
     public function getRawBody()

@@ -14,6 +14,12 @@ use Psr\Http\Message\ResponseInterface;
 class RestApiAssert extends RestAssert
 {
 
+    public function __construct(ResponseInterface $response = null)
+    {
+        parent::__construct($response);
+        $this->body = RestResponseHelper::getBody(clone $this->response, $this->rawBody);
+    }
+
     public function assertUnprocessableEntity(array $fieldNames = [])
     {
         if ($fieldNames) {
