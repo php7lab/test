@@ -4,13 +4,9 @@ namespace PhpLab\Test\Base;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use PhpLab\Core\Helpers\ClassHelper;
-use PhpLab\Core\Helpers\InstanceHelper;
 use PhpLab\Rest\Contract\Authorization\AuthorizationInterface;
 use PhpLab\Rest\Contract\Authorization\BearerAuthorization;
-use PhpLab\Test\Asserts\RestApiAssert;
 use PhpLab\Rest\Contract\Client\RestClient;
-use PhpLab\Test\Asserts\RestAssert;
 use Psr\Http\Message\ResponseInterface;
 
 abstract class BaseRestTest extends BaseTest
@@ -31,10 +27,7 @@ abstract class BaseRestTest extends BaseTest
         return new RestClient($guzzleClient, $authAgent);
     }
 
-    protected function getRestAssert(ResponseInterface $response = null)
-    {
-        return new RestAssert($response);
-    }
+    abstract protected function getRestAssert(ResponseInterface $response = null);
 
     protected function setUp(): void
     {
@@ -42,7 +35,7 @@ abstract class BaseRestTest extends BaseTest
         $this->setBaseUrl($_ENV['API_URL']);
     }
 
-    protected function sendRequest(string $method, string $uri = '', array $options = []): ResponseInterface
+    /*protected function sendRequest(string $method, string $uri = '', array $options = []): ResponseInterface
     {
         $client = $this->getGuzzleClient();
         try {
@@ -51,7 +44,7 @@ abstract class BaseRestTest extends BaseTest
             $response = $e->getResponse();
         }
         return $response;
-    }
+    }*/
 
     protected function getGuzzleClient(): Client
     {
