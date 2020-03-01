@@ -1,6 +1,6 @@
 <?php
 
-namespace PhpLab\Test\Libs;
+namespace PhpLab\Test\Asserts;
 
 use PhpLab\Core\Enums\Http\HttpHeaderEnum;
 use PhpLab\Core\Enums\Http\HttpStatusCodeEnum;
@@ -11,29 +11,8 @@ use PhpLab\Rest\Helpers\RestResponseHelper;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
-class RestAssert extends TestCase
+class RestApiAssert extends RestAssert
 {
-
-    private $response;
-    private $rawBody;
-    private $body;
-
-    public function __construct(ResponseInterface $response = null)
-    {
-        $this->response = $response;
-        $this->rawBody = $response->getBody()->getContents();
-        $this->body = RestResponseHelper::getBody(clone $this->response, $this->rawBody);
-    }
-
-    public function getRawBody()
-    {
-        return $this->rawBody;
-    }
-
-    public function getBody()
-    {
-        return $this->body;
-    }
 
     public function assertUnprocessableEntity(array $fieldNames = [])
     {
@@ -50,47 +29,12 @@ class RestAssert extends TestCase
         return $this;
     }
 
-    public function assertSubsetText($actualString, ResponseInterface $response = null)
-    {
-        $response = $response ?? $this->response;
-        //$body = StringHelper::removeAllSpace($body);
-        $exp = '#[^а-яА-ЯёЁa-zA-Z]+#u';
-        $body = StringHelper::filterChar($this->rawBody, $exp);
-        //$actualString = StringHelper::removeAllSpace($actualString);
-        $actualString = StringHelper::filterChar($actualString, $exp);
-        $isFail = mb_strpos($body, $actualString) === false;
-        if ($isFail) {
-            $this->expectExceptionMessage('Subset string not found in text!');
-        }
-        $this->assertEquals(false, $isFail);
-        return $this;
-    }
-
-    public function assertStatusCode(int $actualStatus = null, ResponseInterface $response = null)
-    {
-        $response = $response ?? $this->response;
-        $statusCode = $response->getStatusCode();
-        if ($actualStatus) {
-            $this->assertEquals($actualStatus, $statusCode);
-        } else {
-            $this->assertTrue($statusCode < 300 && $statusCode >= 200);
-        }
-        return $this;
-    }
-
     public function assertCollection($expectedBody, ResponseInterface $response = null)
     {
         $response = $response ?? $this->response;
         //$this->assertStatusCode(HttpStatusCodeEnum::OK, $response);
         //$this->assertPagination($response, null, 1, 20);
         $this->assertBody($response, $expectedBody);
-        return $this;
-    }
-
-    public function assertBody($expectedBody, ResponseInterface $response = null)
-    {
-        $response = $response ?? $this->response;
-        $this->assertArraySubset($expectedBody, $this->body);
         return $this;
     }
 
@@ -169,6 +113,13 @@ class RestAssert extends TestCase
             $this->assertEquals($totalCount, $dataProviderEntity->getTotalCount());
         }
         $this->assertEquals($dataProviderEntity->getPageCount(), $response->getHeader(HttpHeaderEnum::PAGE_COUNT)[0]);
+        return $this;
+    }
+
+    public function assertBody($expectedBody, ResponseInterface $response = null)
+    {
+        $response = $response ?? $this->response;
+        $this->assertArraySubset($expectedBody, $this->body);
         return $this;
     }
 

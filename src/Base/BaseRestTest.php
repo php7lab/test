@@ -8,8 +8,9 @@ use PhpLab\Core\Helpers\ClassHelper;
 use PhpLab\Core\Helpers\InstanceHelper;
 use PhpLab\Rest\Contract\Authorization\AuthorizationInterface;
 use PhpLab\Rest\Contract\Authorization\BearerAuthorization;
-use PhpLab\Test\Libs\RestAssert;
+use PhpLab\Test\Asserts\RestApiAssert;
 use PhpLab\Rest\Contract\Client\RestClient;
+use PhpLab\Test\Asserts\RestAssert;
 use Psr\Http\Message\ResponseInterface;
 
 abstract class BaseRestTest extends BaseTest
@@ -30,7 +31,7 @@ abstract class BaseRestTest extends BaseTest
         return new RestClient($guzzleClient, $authAgent);
     }
 
-    protected function getRestAssert(ResponseInterface $response = null): RestAssert
+    protected function getRestAssert(ResponseInterface $response = null)
     {
         return new RestAssert($response);
     }
