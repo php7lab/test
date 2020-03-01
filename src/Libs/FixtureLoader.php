@@ -2,41 +2,54 @@
 
 namespace PhpLab\Test\Libs;
 
-use PhpLab\Core\Helpers\InstanceHelper;
+use PhpLab\Test\Libs\FixtureLoader\FixtureLoaderInterface;
+use PhpLab\Test\Libs\FixtureLoader\YiiFixtureLoader;
 use yii\test\Fixture;
 
 class FixtureLoader
 {
 
-    protected $loadedFixtures = [];
+    protected $loaderInstances = [];
+    protected $loaders = [
+        YiiFixtureLoader::class => [
+            Fixture::class,
+        ],
+    ];
 
     public function load(array $fixtures)
     {
-        $this->loadedFixtures = [];
-        $this->loadFixtures($fixtures);
+        if (empty($fixtures)) {
+            return;
+        }
+        foreach ($fixtures as $fixture) {
+            $this->loadFixture($fixture);
+        }
     }
 
-    protected function loadFixtures(array $fixtures)
+    private function getFixtureLoaderClass($fixture): string
     {
-        if ($fixtures) {
-            foreach ($fixtures as $fixture) {
-                $this->loadFixture($fixture);
+        foreach ($this->loaders as $loaderClassName => $fixtureParents) {
+            foreach ($fixtureParents as $fixtureParent) {
+                $isSubClass = is_subclass_of($fixture, $fixtureParent);
+                if ($isSubClass) {
+                    return $loaderClassName;
+                }
             }
         }
     }
 
-    protected function loadFixture($fixture)
+    private function createLoaderInstance($fixture): FixtureLoaderInterface
     {
-        if (isset($this->loadedFixtures[$fixture])) {
-            return;
+        $fixtureLoaderClassName = $this->getFixtureLoaderClass($fixture);
+        if ( ! isset($this->loaderInstances[$fixtureLoaderClassName])) {
+            $this->loaderInstances[$fixtureLoaderClassName] = new $fixtureLoaderClassName;
         }
-        /** @var Fixture $fixtureInstance */
-        $fixtureInstance = InstanceHelper::ensure($fixture);
-        if ($fixtureInstance->depends) {
-            $this->loadFixtures($fixtureInstance->depends);
-        }
-        $fixtureInstance->unload();
-        $fixtureInstance->load();
-        $this->loadedFixtures[$fixture] = true;
+        return $this->loaderInstances[$fixtureLoaderClassName];
+    }
+
+    private function loadFixture($fixture)
+    {
+        $fixtureLoaderInstance = $this->createLoaderInstance($fixture);
+        $fixtureLoaderInstance->loadFixtures([$fixture]);
     }
 }
