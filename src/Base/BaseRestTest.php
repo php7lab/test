@@ -4,9 +4,12 @@ namespace PhpLab\Test\Base;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use PhpLab\Test\Libs\AuthAgent;
+use PhpLab\Core\Helpers\ClassHelper;
+use PhpLab\Core\Helpers\InstanceHelper;
+use PhpLab\Rest\Contract\Authorization\AuthorizationInterface;
+use PhpLab\Rest\Contract\Authorization\BearerAuthorization;
 use PhpLab\Test\Libs\RestAssert;
-use PhpLab\Test\Libs\RestClient;
+use PhpLab\Rest\Contract\Client\RestClient;
 use Psr\Http\Message\ResponseInterface;
 
 abstract class BaseRestTest extends BaseTest
@@ -15,10 +18,15 @@ abstract class BaseRestTest extends BaseTest
     protected $baseUrl;
     protected $basePath = '/';
 
+    protected function getAuthorizationContract(Client $guzzleClient): AuthorizationInterface
+    {
+        return new BearerAuthorization($guzzleClient);
+    }
+
     protected function getRestClient(): RestClient
     {
         $guzzleClient = $this->getGuzzleClient();
-        $authAgent = new AuthAgent($guzzleClient);
+        $authAgent = $this->getAuthorizationContract($guzzleClient);
         return new RestClient($guzzleClient, $authAgent);
     }
 

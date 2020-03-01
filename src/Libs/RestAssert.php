@@ -7,6 +7,7 @@ use PhpLab\Core\Enums\Http\HttpStatusCodeEnum;
 use PhpLab\Core\Helpers\StringHelper;
 use PhpLab\Core\Legacy\Yii\Helpers\ArrayHelper;
 use PhpLab\Test\Helpers\RestHelper;
+use PhpLab\Rest\Helpers\RestResponseHelper;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
@@ -21,8 +22,7 @@ class RestAssert extends TestCase
     {
         $this->response = $response;
         $this->rawBody = $response->getBody()->getContents();
-        //dd($this->rawBody);
-        $this->body = RestHelper::getBody(clone $this->response, $this->rawBody);
+        $this->body = RestResponseHelper::getBody(clone $this->response, $this->rawBody);
     }
 
     public function getRawBody()
@@ -158,7 +158,7 @@ class RestAssert extends TestCase
     public function assertPagination(int $totalCount = null, int $page = null, int $pageSize = null, ResponseInterface $response = null)
     {
         $response = $response ?? $this->response;
-        $dataProviderEntity = RestHelper::forgeDataProviderEntity($response);
+        $dataProviderEntity = RestResponseHelper::forgeDataProviderEntity($response);
         if ($page) {
             $this->assertEquals($page, $dataProviderEntity->getPage());
         }
