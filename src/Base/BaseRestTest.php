@@ -20,6 +20,14 @@ abstract class BaseRestTest extends BaseTest
         return new BearerAuthorization($guzzleClient);
     }
 
+    protected function printContent(ResponseInterface $response = null, string $filter = null) {
+        $content = $response->getBody()->getContents();
+        if($filter) {
+            $content = $filter($content);
+        }
+        dd($content);
+    }
+
     protected function getRestClient(): RestClient
     {
         $guzzleClient = $this->getGuzzleClient();

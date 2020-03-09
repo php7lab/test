@@ -12,14 +12,6 @@ abstract class BaseRestWebTest extends BaseRestTest
         $this->printContent($response, 'strip_tags');
     }
 
-    protected function printContent(ResponseInterface $response = null, string $filter = null) {
-        $content = $response->getBody()->getContents();
-        if($filter) {
-            $content = $filter($content);
-        }
-        dd($content);
-    }
-
     protected function getRestAssert(ResponseInterface $response = null): RestWebAssert
     {
         return new RestWebAssert($response);
