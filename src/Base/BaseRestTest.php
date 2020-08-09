@@ -15,6 +15,8 @@ abstract class BaseRestTest extends BaseTest
     protected $baseUrl;
     protected $basePath = '/';
 
+    private $restClient;
+
     protected function getAuthorizationContract(Client $guzzleClient): AuthorizationInterface
     {
         return new BearerAuthorization($guzzleClient);
