@@ -2,6 +2,10 @@
 
 namespace PhpLab\Test\Libs;
 
+use PhpLab\Eloquent\Db\Helpers\Manager;
+use PhpLab\Eloquent\Fixture\Repositories\DbRepository;
+use PhpLab\Eloquent\Fixture\Repositories\FileRepository;
+use PhpLab\Eloquent\Fixture\Services\FixtureService;
 use PhpLab\Test\Libs\FixtureLoader\FixtureLoaderInterface;
 use PhpLab\Test\Libs\FixtureLoader\YiiFixtureLoader;
 use yii\test\Fixture;
@@ -47,9 +51,16 @@ class FixtureLoader
         return $this->loaderInstances[$fixtureLoaderClassName];
     }
 
-    private function loadFixture($fixture)
+    private function loadFixture(string $fixture)
     {
-        $fixtureLoaderInstance = $this->createLoaderInstance($fixture);
-        $fixtureLoaderInstance->loadFixtures([$fixture]);
+        if(class_exists($fixture)) {
+            $fixtureLoaderInstance = $this->createLoaderInstance($fixture);
+            $fixtureLoaderInstance->loadFixtures([$fixture]);
+        } elseif (file_exists($fixture)) {
+
+        } else {
+            $fixtureService = new FixtureService(new DbRepository(new Manager), new FileRepository());
+            $fixtureService->importTable($fixture);
+        }
     }
 }
